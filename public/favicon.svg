@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <!-- Rounded background matching the navbar icon -->
+  <rect x="2" y="2" width="28" height="28" rx="8" fill="#3B6D11" />
+  <!-- Logo path in white, centered -->
+  <g transform="translate(4, 4)">
+    <path d="M12 3c-1.2 0-2.4.4-3.4 1.2A10 10 0 005 13c0 4.4 3.6 8 8 8h1a8 8 0 008-8 10 10 0 00-3.8-8.8c-1-.8-2.2-1.2-3.4-1.2z" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M12 3v18M12 11c2-1 4-1 6 0M12 15c-2-1-4-1-6 0" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+</svg>
