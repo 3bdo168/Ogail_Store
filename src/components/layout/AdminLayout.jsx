@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { LayoutDashboard, ShoppingBag, ClipboardList, Truck } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, ClipboardList, Truck, Settings } from 'lucide-react';
 
 const AdminLayout = () => {
   const navItems = [
@@ -8,6 +8,7 @@ const AdminLayout = () => {
     { to: '/admin/products', label: 'المنتجات', icon: <ShoppingBag size={20} /> },
     { to: '/admin/orders', label: 'الطلبات', icon: <ClipboardList size={20} /> },
     { to: '/admin/shipping', label: 'أسعار الشحن', icon: <Truck size={20} /> },
+    { to: '/admin/dashboard#settings', label: 'إعدادات المتجر', icon: <Settings size={20} /> },
   ];
 
   const linkClass = ({ isActive }) =>

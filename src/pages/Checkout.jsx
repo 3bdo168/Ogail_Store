@@ -128,7 +128,8 @@ const Checkout = () => {
       }
     } catch (err) {
       console.error(err);
-      setFormError('حدث خطأ أثناء تسجيل الطلب. يرجى المحاولة مرة أخرى.');
+      // Show the exact error message from the transaction (e.g. stock shortage) or a generic fallback
+      setFormError(err.message || 'حدث خطأ أثناء تسجيل الطلب. يرجى المحاولة مرة أخرى.');
     } finally {
       setSubmitting(false);
     }

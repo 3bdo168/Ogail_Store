@@ -196,10 +196,10 @@ export const notifyAdminNewOrder = (order, currencySymbol = 'ج.م') => {
 🏙 *المحافظة:* ${order.governorate || 'غير محدد'}
 
 📦 *المنتجات:*
-${order.items.map(i => `• ${i.name} × ${i.quantity} = ${(i.price * i.quantity).toLocaleString('ar-EG')} ج.م`).join('\n')}
+${order.items.map(i => `• ${i.name} × ${i.quantity} = ${(i.price * i.quantity).toLocaleString('ar-EG')} ${currencySymbol}`).join('\n')}
 
-🚚 *الشحن:* ${order.shippingCost || 0} ج.م
-💰 *الإجمالي:* ${order.totalPrice.toLocaleString('ar-EG')} ج.م
+🚚 *الشحن:* ${order.shippingCost || 0} ${currencySymbol}
+💰 *الإجمالي:* ${order.totalPrice.toLocaleString('ar-EG')} ${currencySymbol}
 💳 *الدفع:* ${
     order.paymentMethod === 'whatsapp'
       ? 'تأكيد عبر واتساب 💬'
