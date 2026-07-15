@@ -1,13 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BRAND } from '../../config/brand';
 import { useProducts } from '../../hooks/useProducts';
 import { useOrders } from '../../hooks/useOrders';
 import Loader from '../../components/ui/Loader';
+import Button from '../../components/ui/Button';
+import { getStoreSettings, updateCurrency } from '../../services/settingsService';
+import { CURRENCIES } from '../../config/currency';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const Dashboard = () => {
   const { products, loading: productsLoading } = useProducts(true);
   const { orders, loading: ordersLoading } = useOrders(true);
+  const { currencySymbol } = useCurrency();
+
+  // Settings state
+  const [selectedCurrency, setSelectedCurrency] = useState('EGP');
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState('');
+  const [settingsError, setSettingsError] = useState('');
+
+  // Fetch initial store settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const settings = await getStoreSettings();
+        setSelectedCurrency(settings.currency || 'EGP');
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const handleSaveSettings = async () => {
+    setSettingsLoading(true);
+    setSettingsError('');
+    setSettingsSuccess('');
+    try {
+      await updateCurrency(selectedCurrency);
+      setSettingsSuccess('تم تحديث عملة المتجر بنجاح!');
+      setTimeout(() => setSettingsSuccess(''), 4000);
+    } catch (err) {
+      console.error(err);
+      setSettingsError('حدث خطأ أثناء حفظ الإعدادات.');
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
 
   if (productsLoading || ordersLoading) {
     return <Loader fullPage={true} message="جاري تحميل إحصائيات لوحة التحكم..." />;
@@ -76,7 +116,7 @@ const Dashboard = () => {
             <span className="text-[11px] text-emerald-600 bg-emerald-50 font-bold px-2 py-1 rounded-lg">المبيعات النشطة</span>
           </div>
           <span className="block text-stone-400 text-xs font-bold mb-1">إجمالي المبيعات</span>
-          <span className="text-2xl font-black text-stone-800">{totalRevenue.toLocaleString('ar-EG')} ج.م</span>
+          <span className="text-2xl font-black text-stone-800">{totalRevenue.toLocaleString('ar-EG')} {currencySymbol}</span>
         </div>
 
         {/* Orders */}
@@ -166,7 +206,7 @@ const Dashboard = () => {
                       {order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-EG') : 'N/A'}
                     </td>
                     <td className="py-4 px-4 font-bold text-stone-800">
-                      {order.totalPrice.toLocaleString('ar-EG')} ج.م
+                      {order.totalPrice.toLocaleString('ar-EG')} {currencySymbol}
                     </td>
                     <td className="py-4 px-4">
                       <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${order.paymentStatus === 'paid'
@@ -188,6 +228,48 @@ const Dashboard = () => {
           </div>
         )}
 
+      </div>
+
+      {/* Store Settings Section */}
+      <div className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 mb-8 mt-8">
+        <h3 className="text-lg font-black text-stone-850 mb-2">إعدادات المتجر العامة</h3>
+        <p className="text-stone-500 text-xs mb-6">تحكم في خيارات المتجر الأساسية مثل العملة الرسمية للموقع.</p>
+        
+        {settingsError && (
+          <div className="bg-rose-50 border border-rose-100 text-rose-750 p-4 rounded-2xl text-xs font-bold mb-4">
+            {settingsError}
+          </div>
+        )}
+        {settingsSuccess && (
+          <div className="bg-emerald-50 border border-emerald-100 text-emerald-750 p-4 rounded-2xl text-xs font-bold mb-4">
+            {settingsSuccess}
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row items-end gap-4 max-w-md">
+          <div className="w-full">
+            <label className="block text-stone-600 font-bold text-xs mb-2">العملة الافتراضية للموقع</label>
+            <select
+              value={selectedCurrency}
+              onChange={(e) => setSelectedCurrency(e.target.value)}
+              className="w-full px-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-stone-750 font-bold text-sm cursor-pointer"
+            >
+              {Object.values(CURRENCIES).map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.name} ({c.symbol})
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button
+            onClick={handleSaveSettings}
+            loading={settingsLoading}
+            variant="primary"
+            className="py-2.5 px-6 rounded-xl font-black text-xs whitespace-nowrap sm:w-auto w-full"
+          >
+            حفظ الإعدادات
+          </Button>
+        </div>
       </div>
 
     </div>

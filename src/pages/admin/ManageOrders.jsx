@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { useOrders } from '../../hooks/useOrders';
 import Loader from '../../components/ui/Loader';
 import { notifyCustomer } from '../../services/whatsappService';
+import { useCurrency } from '../../context/CurrencyContext';
 import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 const ManageOrders = () => {
+  const { currencySymbol } = useCurrency();
   const { orders, loading, updateStatus, updatePayment, fetchOrders } = useOrders(true);
 
   // Filters State
@@ -45,7 +47,7 @@ const ManageOrders = () => {
       );
 
       if (shouldNotify) {
-        const result = notifyCustomer(order, newStatus);
+        const result = notifyCustomer(order, newStatus, currencySymbol);
         
         // 3. Update lastNotifiedStatus in Firestore
         await updateDoc(doc(db, 'orders', order.id), {
@@ -200,7 +202,7 @@ const ManageOrders = () => {
                   {['processing', 'shipped', 'delivered', 'cancelled'].includes(order.orderStatus) && (
                     <button
                       onClick={() => {
-                        const result = notifyCustomer(order, order.orderStatus);
+                        const result = notifyCustomer(order, order.orderStatus, currencySymbol);
                         if (!result.success) {
                           alert(`لم يتم فتح نافذة واتساب تلقائياً. يرجى فتح الرابط يدوياً:\n\n${result.url}`);
                         }
@@ -255,7 +257,7 @@ const ManageOrders = () => {
                   </div>
                   <div className="border-t border-stone-100 pt-2.5 mt-1 flex justify-between text-sm font-bold text-stone-850">
                     <span>إجمالي القيمة:</span>
-                    <span className="text-primary-dark font-black">{order.totalPrice.toLocaleString('ar-EG')} ج.م</span>
+                    <span className="text-primary-dark font-black">{order.totalPrice.toLocaleString('ar-EG')} {currencySymbol}</span>
                   </div>
                 </div>
 
@@ -274,7 +276,7 @@ const ManageOrders = () => {
                         </div>
                         <div className="flex-grow min-w-0">
                           <h5 className="font-bold text-stone-850 line-clamp-1">{item.name}</h5>
-                          <span className="text-[11px] text-stone-400 font-bold">سعر الوحدة: {item.price} ج.م</span>
+                          <span className="text-[11px] text-stone-400 font-bold">سعر الوحدة: {item.price} {currencySymbol}</span>
                         </div>
                         <span className="font-black text-stone-700 bg-stone-100 px-2.5 py-1 rounded-lg">
                           الكمية: {item.quantity}

@@ -26,7 +26,7 @@ export const sendWhatsAppMessage = (phoneNumber, message) => {
 };
 
 // إنشاء رابط تأكيد الطلب للعميل لإرساله للمتجر
-export const getCustomerWhatsAppConfirmLink = (order) => {
+export const getCustomerWhatsAppConfirmLink = (order, currencySymbol = 'ج.م') => {
   const storePhone = import.meta.env.VITE_STORE_WHATSAPP_NUMBER || BRAND.whatsappNumberRaw;
   const phone = sanitizeEgyptianPhone(storePhone);
   
@@ -41,10 +41,10 @@ export const getCustomerWhatsAppConfirmLink = (order) => {
 📍 *العنوان:* ${order.customerAddress} (${order.governorate || ''})
 
 📦 *المنتجات المطلوبة:*
-${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('ar-EG')} ج.م`).join('\n')}
+${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('ar-EG')} ${currencySymbol}`).join('\n')}
 
-🚚 *تكلفة الشحن:* ${order.shippingCost || 0} ج.م
-💵 *الإجمالي الكلي:* ${order.totalPrice.toLocaleString('ar-EG')} ج.م
+🚚 *تكلفة الشحن:* ${order.shippingCost || 0} ${currencySymbol}
+💵 *الإجمالي الكلي:* ${order.totalPrice.toLocaleString('ar-EG')} ${currencySymbol}
 
 أرجو تأكيد الطلب وتجهيزه للشحن 🙏
   `.trim();
@@ -56,7 +56,7 @@ ${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quanti
 // رسائل لكل حالة
 export const ORDER_STATUS_MESSAGES = {
   // تأكيد الطلب للعميل (فور الشراء)
-  confirmed: (order) => `
+  confirmed: (order, currencySymbol = 'ج.م') => `
 🌿 *${BRAND.nameArabic}*
 
 أهلاً ${order.customerName}! 😊
@@ -65,11 +65,11 @@ export const ORDER_STATUS_MESSAGES = {
 رقم طلبك: *#${order.id.substring(0, 8)}*
 
 📦 *المنتجات:*
-${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('ar-EG')} ج.م`).join('\n')}
+${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quantity).toLocaleString('ar-EG')} ${currencySymbol}`).join('\n')}
 
 🚚 *الشحن إلى:* ${order.governorate || ''}
-💰 *سعر الشحن:* ${order.shippingCost || 0} ج.م
-💵 *الإجمالي:* ${order.totalPrice.toLocaleString('ar-EG')} ج.م
+💰 *سعر الشحن:* ${order.shippingCost || 0} ${currencySymbol}
+💵 *الإجمالي:* ${order.totalPrice.toLocaleString('ar-EG')} ${currencySymbol}
 💳 *الدفع:* ${
     order.paymentMethod === 'whatsapp'
       ? 'تأكيد عبر واتساب 💬'
@@ -81,7 +81,7 @@ ${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quanti
 هنتواصل معك قريباً لتأكيد موعد التوصيل 🙏
   `.trim(),
 
-  processing: (order) => `
+  processing: (order, currencySymbol = 'ج.م') => `
 ✅ *${BRAND.nameArabic}*
 
 أهلاً ${order.customerName}! 🌿
@@ -91,13 +91,13 @@ ${order.items.map(i => `• ${i.name} × ${i.quantity} — ${(i.price * i.quanti
 📦 *المنتجات:*
 ${order.items.map(i => `• ${i.name} × ${i.quantity}`).join('\n')}
 
-💰 *الإجمالي:* ${order.totalPrice} ج.م
+💰 *الإجمالي:* ${order.totalPrice} ${currencySymbol}
 🚚 *الشحن إلى:* ${order.governorate || 'غير محدد'}
 
 هنبعتلك رسالة تانية لما يتشحن. شكراً لثقتك! 🙏
   `.trim(),
 
-  shipped: (order) => `
+  shipped: (order, currencySymbol = 'ج.م') => `
 🚚 *${BRAND.nameArabic}*
 
 أهلاً ${order.customerName}! 🌿
@@ -111,7 +111,7 @@ ${
   order.paymentMethod === 'whatsapp'
     ? '💬 *طريقة الدفع:* تأكيد وتنسيق الدفع عبر واتساب'
     : (order.paymentMethod === 'cod' || order.paymentMethod === 'cash')
-    ? `💵 *طريقة الدفع:* كاش عند الاستلام (${order.totalPrice} ج.م)`
+    ? `💵 *طريقة الدفع:* كاش عند الاستلام (${order.totalPrice} ${currencySymbol})`
     : '✅ *الدفع:* تم الدفع إلكترونياً'
 }
 
@@ -147,15 +147,15 @@ ${
 };
 
 // إشعار العميل
-export const notifyCustomer = (order, status) => {
+export const notifyCustomer = (order, status, currencySymbol = 'ج.م') => {
   const generator = ORDER_STATUS_MESSAGES[status];
   if (!generator || !order.customerPhone) return { success: false };
-  const message = generator(order);
+  const message = generator(order, currencySymbol);
   return sendWhatsAppMessage(order.customerPhone, message);
 };
 
 // إشعار الأدمن بطلب جديد
-export const notifyAdminNewOrder = (order) => {
+export const notifyAdminNewOrder = (order, currencySymbol = 'ج.م') => {
   const adminPhone = import.meta.env.VITE_STORE_WHATSAPP_NUMBER || BRAND.whatsappNumberRaw; // ← رقم واتساب الأدمن
   const message = `
 🔔 *طلب جديد على ${BRAND.nameArabic}!*

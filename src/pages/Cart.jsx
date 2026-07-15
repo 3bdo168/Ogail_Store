@@ -4,9 +4,11 @@ import { useCart } from '../context/CartContext';
 import CartItem from '../components/cart/CartItem';
 import EmptyState from '../components/ui/EmptyState';
 import Button from '../components/ui/Button';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Cart = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { currencySymbol } = useCurrency();
   const shippingCost = 50; // flat rate for Egypt
 
   if (cartItems.length === 0) {
@@ -64,16 +66,16 @@ const Cart = () => {
             <div className="flex flex-col gap-4 mb-6 text-sm text-stone-650 text-right">
               <div className="flex justify-between">
                 <span>المجموع الفرعي:</span>
-                <span className="font-bold text-stone-800">{cartTotal.toLocaleString('ar-EG')} ج.م</span>
+                <span className="font-bold text-stone-800">{cartTotal.toLocaleString('ar-EG')} {currencySymbol}</span>
               </div>
               <div className="flex justify-between">
                 <span>تكلفة التوصيل (شحن موحد):</span>
-                <span className="font-bold text-stone-800">{shippingCost.toLocaleString('ar-EG')} ج.م</span>
+                <span className="font-bold text-stone-800">{shippingCost.toLocaleString('ar-EG')} {currencySymbol}</span>
               </div>
               <div className="border-t border-stone-100 pt-4 flex justify-between text-base font-bold text-stone-850">
                 <span>إجمالي الطلب:</span>
                 <span className="text-xl font-black text-primary-dark">
-                  {(cartTotal + shippingCost).toLocaleString('ar-EG')} ج.م
+                  {(cartTotal + shippingCost).toLocaleString('ar-EG')} {currencySymbol}
                 </span>
               </div>
             </div>

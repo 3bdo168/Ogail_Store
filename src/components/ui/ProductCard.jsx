@@ -2,9 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import Button from './Button';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { currencySymbol } = useCurrency();
   const { id, name, price, category, imageUrl, stock, isAvailable } = product;
 
   const outOfStock = !isAvailable || stock <= 0;
@@ -62,7 +64,7 @@ const ProductCard = ({ product }) => {
           <div className="flex flex-col">
             <span className="text-xs text-stone-400 font-bold">السعر</span>
             <span className="text-xl font-black text-primary-dark font-cairo">
-              {price.toLocaleString('ar-EG')} <span className="text-xs font-normal">ج.م</span>
+              {price.toLocaleString('ar-EG')} <span className="text-xs font-normal">{currencySymbol}</span>
             </span>
           </div>
 

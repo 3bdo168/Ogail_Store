@@ -1,10 +1,12 @@
 import { ShoppingCart, Star } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { useState } from 'react'
+import { useCurrency } from '../../context/CurrencyContext'
 
 export default function ProductCard({ product }) {
   const { addToCart } = useCart()
   const [added, setAdded] = useState(false)
+  const { currencySymbol } = useCurrency()
 
   const handleAdd = () => {
     addToCart(product)
@@ -68,11 +70,11 @@ export default function ProductCard({ product }) {
         <div className="flex items-center justify-between mt-auto pt-2 gap-2">
           <div className="flex flex-col">
             <span className="text-primary font-extrabold text-lg leading-none">
-              {product.price} جنيه
+              {product.price} {currencySymbol}
             </span>
             {product.originalPrice && (
               <span className="text-muted text-xs line-through">
-                {product.originalPrice} جنيه
+                {product.originalPrice} {currencySymbol}
               </span>
             )}
           </div>

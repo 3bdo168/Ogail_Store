@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, doc, getDoc, orderBy } from 'firebas
 import Loader from '../components/ui/Loader';
 import Button from '../components/ui/Button';
 import ReviewForm from '../components/ui/ReviewForm';
+import { useCurrency } from '../context/CurrencyContext';
 
 const ORDER_STEPS = [
   { key: 'pending', label: 'تم الاستلام', icon: '📋' },
@@ -13,6 +14,7 @@ const ORDER_STEPS = [
 ];
 
 const OrderTracking = () => {
+  const { currencySymbol } = useCurrency();
   const [searchQuery, setSearchQuery] = useState('');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -239,15 +241,15 @@ const OrderTracking = () => {
                     <div className="border-t border-stone-200/60 pt-3 mt-2 flex flex-col gap-2 text-stone-500">
                       <div className="flex justify-between">
                         <span>قيمة المنتجات:</span>
-                        <span>{(order.totalPrice - (order.shippingCost || 0)).toLocaleString('ar-EG')} ج.م</span>
+                        <span>{(order.totalPrice - (order.shippingCost || 0)).toLocaleString('ar-EG')} {currencySymbol}</span>
                       </div>
                       <div className="flex justify-between">
                         <span>سعر الشحن:</span>
-                        <span>{(order.shippingCost || 0).toLocaleString('ar-EG')} ج.م</span>
+                        <span>{(order.shippingCost || 0).toLocaleString('ar-EG')} {currencySymbol}</span>
                       </div>
                       <div className="flex justify-between text-sm font-black text-stone-850 pt-1 border-t border-stone-200/30">
                         <span>الإجمالي الكلي:</span>
-                        <span className="text-primary-dark">{order.totalPrice.toLocaleString('ar-EG')} ج.م</span>
+                        <span className="text-primary-dark">{order.totalPrice.toLocaleString('ar-EG')} {currencySymbol}</span>
                       </div>
                     </div>
                   </div>
@@ -273,7 +275,7 @@ const OrderTracking = () => {
                               <div className="flex-grow min-w-0">
                                 <h5 className="font-bold text-stone-850 text-sm line-clamp-1">{item.name}</h5>
                                 <span className="text-[11px] text-stone-400 font-bold">
-                                  {item.quantity} × {item.price} ج.م
+                                  {item.quantity} × {item.price} {currencySymbol}
                                 </span>
                               </div>
                               

@@ -3,9 +3,11 @@ import { useProducts } from '../../hooks/useProducts';
 import { uploadImage } from '../../services/cloudinaryService';
 import Loader from '../../components/ui/Loader';
 import Button from '../../components/ui/Button';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const ManageProducts = () => {
   const { products, loading, addProduct, editProduct, removeProduct, categories } = useProducts(false);
+  const { currencySymbol } = useCurrency();
 
   // Form states
   const [editingId, setEditingId] = useState(null);
@@ -200,7 +202,7 @@ const ManageProducts = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-stone-650 font-bold text-xs mb-2">السعر (ج.م) *</label>
+                  <label className="block text-stone-650 font-bold text-xs mb-2">السعر ({currencySymbol}) *</label>
                   <input
                     type="number"
                     name="price"
@@ -418,7 +420,7 @@ const ManageProducts = () => {
                           className="w-20 text-center border border-stone-200 rounded-lg px-2 py-1 text-sm font-bold focus:ring-2 focus:ring-primary focus:outline-none bg-stone-50 hover:bg-white transition-colors"
                           min="1"
                         />
-                        <span className="text-xs text-stone-400 mr-1">ج.م</span>
+                        <span className="text-xs text-stone-400 mr-1">{currencySymbol}</span>
                       </div>
                     </td>
 

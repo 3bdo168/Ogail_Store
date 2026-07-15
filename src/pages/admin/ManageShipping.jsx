@@ -9,9 +9,11 @@ import {
 import Loader from '../../components/ui/Loader';
 import Button from '../../components/ui/Button';
 import { Save, RefreshCw, Plus, Trash2 } from 'lucide-react';
+import { useCurrency } from '../../context/CurrencyContext';
 
 
 const ManageShipping = () => {
+  const { currencySymbol } = useCurrency();
   const [shippingRates, setShippingRates] = useState([]);
   const [localRates, setLocalRates] = useState({}); // Stores local edits: { [id]: { price, estimatedDays, isActive } }
   const [loading, setLoading] = useState(true);
@@ -360,11 +362,11 @@ const ManageShipping = () => {
             <table className="w-full text-right border-collapse text-sm">
               <thead>
                 <tr className="border-b border-stone-100 text-stone-400 font-bold">
-                  <th className="py-4 px-4">المحافظة</th>
-                  <th className="py-4 px-4">سعر الشحن (ج.م)</th>
-                  <th className="py-4 px-4">وقت التوصيل المتوقع</th>
-                  <th className="py-4 px-4">الحالة</th>
-                  <th className="py-4 px-4 text-center">العمليات</th>
+                  <th className="py-4 px-4 font-bold text-stone-400">المحافظة</th>
+                  <th className="py-4 px-4 font-bold text-stone-400">سعر الشحن ({currencySymbol})</th>
+                  <th className="py-4 px-4 font-bold text-stone-400">وقت التوصيل المتوقع</th>
+                  <th className="py-4 px-4 font-bold text-stone-400">الحالة</th>
+                  <th className="py-4 px-4 text-center font-bold text-stone-400">العمليات</th>
                 </tr>
               </thead>
               <tbody>
@@ -395,7 +397,7 @@ const ManageShipping = () => {
                             className="w-20 text-center border border-stone-200 rounded-lg px-2 py-1.5 text-sm font-bold focus:ring-2 focus:ring-primary focus:outline-none bg-stone-50 focus:bg-white transition-colors"
                             min="0"
                           />
-                          <span className="text-xs text-stone-400">ج.م</span>
+                          <span className="text-xs text-stone-400">{currencySymbol}</span>
                         </div>
                       </td>
 
@@ -485,7 +487,7 @@ const ManageShipping = () => {
               </div>
 
               <div>
-                <label className="block text-stone-600 font-bold text-xs mb-2">سعر الشحن (ج.م) *</label>
+                <label className="block text-stone-600 font-bold text-xs mb-2">سعر الشحن ({currencySymbol}) *</label>
                 <input
                   type="number"
                   required

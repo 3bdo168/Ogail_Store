@@ -4,9 +4,11 @@ import { useCart } from '../../context/CartContext';
 import CartItem from './CartItem';
 import EmptyState from '../ui/EmptyState';
 import Button from '../ui/Button';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const CartDrawer = () => {
   const { cartItems, isCartOpen, setIsCartOpen, cartTotal } = useCart();
+  const { currencySymbol } = useCurrency();
   const navigate = useNavigate();
 
   // Close drawer on escape key
@@ -91,7 +93,7 @@ const CartDrawer = () => {
               <div className="flex justify-between text-base font-bold text-stone-800 mb-6">
                 <span>المجموع الفرعي:</span>
                 <span className="text-2xl font-black text-primary-dark">
-                  {cartTotal.toLocaleString('ar-EG')} ج.م
+                  {cartTotal.toLocaleString('ar-EG')} {currencySymbol}
                 </span>
               </div>
               <p className="text-stone-400 text-xs mb-6 leading-relaxed">

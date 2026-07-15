@@ -1,8 +1,10 @@
 import React from 'react';
 import { useCart } from '../../context/CartContext';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const CartItem = ({ item }) => {
   const { updateQuantity, removeFromCart } = useCart();
+  const { currencySymbol } = useCurrency();
   const { id, name, price, imageUrl, quantity, stock } = item;
 
   const displayImage = imageUrl || 'https://images.unsplash.com/photo-1596003906949-67221c37965c?auto=format&fit=crop&q=80&w=200';
@@ -41,7 +43,7 @@ const CartItem = ({ item }) => {
         {/* Price & Quantity Controls */}
         <div className="flex items-center justify-between mt-2 gap-2">
           <span className="text-sm font-bold text-stone-500">
-            {(price * quantity).toLocaleString('ar-EG')} ج.م
+            {(price * quantity).toLocaleString('ar-EG')} {currencySymbol}
           </span>
 
           <div className="flex items-center border border-stone-200 bg-white rounded-xl overflow-hidden shadow-sm">

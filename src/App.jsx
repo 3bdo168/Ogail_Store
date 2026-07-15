@@ -2,6 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { CurrencyProvider } from './context/CurrencyContext';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import CartDrawer from './components/cart/CartDrawer';
@@ -28,7 +29,8 @@ import AdminLayout from './components/layout/AdminLayout';
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
+      <CurrencyProvider>
+        <CartProvider>
         <ScrollToTop />
         <div className="flex flex-col min-h-screen bg-stone-50 text-stone-900 font-cairo">
           <Navbar />
@@ -60,7 +62,8 @@ function App() {
           </main>
           <Footer />
         </div>
-      </CartProvider>
+        </CartProvider>
+      </CurrencyProvider>
     </AuthProvider>
   );
 }

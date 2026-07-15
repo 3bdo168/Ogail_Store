@@ -7,12 +7,14 @@ import ProductCard from '../components/ui/ProductCard';
 import Loader from '../components/ui/Loader';
 import Button from '../components/ui/Button';
 import { getProductReviews, getProductRating } from '../services/reviewService';
+import { useCurrency } from '../context/CurrencyContext';
 
 const ProductDetails = () => {
   const { id } = useParams();
   const { fetchProductById, product, loadingProduct, errorProduct, products, fetchProducts } = useProducts();
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
+  const { currencySymbol } = useCurrency();
   const [reviews, setReviews] = useState([]);
   const [ratingStats, setRatingStats] = useState({ avg: 0, count: 0 });
 
@@ -133,7 +135,7 @@ const ProductDetails = () => {
 
             <div className="mb-6">
               <span className="text-3xl font-black text-primary-dark">
-                {price.toLocaleString('ar-EG')} <span className="text-lg font-normal">ج.م</span>
+                {price.toLocaleString('ar-EG')} <span className="text-lg font-normal">{currencySymbol}</span>
               </span>
             </div>
 

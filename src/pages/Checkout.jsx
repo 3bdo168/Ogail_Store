@@ -5,9 +5,11 @@ import { useOrders } from '../hooks/useOrders';
 import Button from '../components/ui/Button';
 import { subscribeToShippingRates } from '../services/shippingService';
 import { notifyCustomer, notifyAdminNewOrder } from '../services/whatsappService';
+import { useCurrency } from '../context/CurrencyContext';
 
 const Checkout = () => {
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { currencySymbol } = useCurrency();
   const { submitOrder, payWithPaymob } = useOrders();
   const navigate = useNavigate();
 
@@ -104,10 +106,10 @@ const Checkout = () => {
       const savedOrder = { id: orderId, ...orderData };
 
       // 1. إشعار العميل بتأكيد الطلب
-      const customerResult = notifyCustomer(savedOrder, 'confirmed');
+      const customerResult = notifyCustomer(savedOrder, 'confirmed', currencySymbol);
 
       // 2. إشعار الأدمن
-      notifyAdminNewOrder(savedOrder);
+      notifyAdminNewOrder(savedOrder, currencySymbol);
 
       clearCart();
 
@@ -243,7 +245,7 @@ const Checkout = () => {
                   <option value="">اختر المحافظة</option>
                   {shippingRates.map((rate) => (
                     <option key={rate.id} value={rate.id}>
-                      {rate.name} (شحن بقيمة {rate.price} ج.م)
+                      {rate.name} (شحن بقيمة {rate.price} {currencySymbol})
                     </option>
                   ))}
                 </select>
@@ -361,9 +363,9 @@ const Checkout = () => {
                   </div>
                   <div className="flex-grow min-w-0">
                     <h4 className="font-bold text-stone-800 text-xs line-clamp-1">{item.name}</h4>
-                    <span className="text-[11px] text-stone-400 font-bold">{item.quantity} × {item.price} ج.م</span>
+                    <span className="text-[11px] text-stone-400 font-bold">{item.quantity} × {item.price} {currencySymbol}</span>
                   </div>
-                  <span className="text-xs font-black text-stone-700">{(item.price * item.quantity).toLocaleString('ar-EG')} ج.م</span>
+                  <span className="text-xs font-black text-stone-700">{(item.price * item.quantity).toLocaleString('ar-EG')} {currencySymbol}</span>
                 </div>
               ))}
             </div>
@@ -372,12 +374,12 @@ const Checkout = () => {
             <div className="flex flex-col gap-3 text-sm text-stone-500 pb-4 mb-4 border-b border-stone-100">
               <div className="flex justify-between">
                 <span>إجمالي المنتجات:</span>
-                <span className="font-bold text-stone-700">{cartTotal.toLocaleString('ar-EG')} ج.م</span>
+                <span className="font-bold text-stone-700">{cartTotal.toLocaleString('ar-EG')} {currencySymbol}</span>
               </div>
               <div className="flex justify-between">
                 <span>تكلفة الشحن والتعبئة:</span>
                 <span className="font-bold text-stone-700">
-                  {shippingCost > 0 ? `${shippingCost.toLocaleString('ar-EG')} ج.م` : 'حدد المحافظة'}
+                  {shippingCost > 0 ? `${shippingCost.toLocaleString('ar-EG')} ${currencySymbol}` : 'حدد المحافظة'}
                 </span>
               </div>
             </div>
@@ -385,7 +387,7 @@ const Checkout = () => {
             <div className="flex justify-between text-base font-bold text-stone-850">
               <span>الإجمالي الكلي:</span>
               <span className="text-2xl font-black text-primary-dark">
-                {grandTotal.toLocaleString('ar-EG')} ج.م
+                {grandTotal.toLocaleString('ar-EG')} {currencySymbol}
               </span>
             </div>
 

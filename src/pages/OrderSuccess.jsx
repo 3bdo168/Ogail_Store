@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import Loader from '../components/ui/Loader';
 import Button from '../components/ui/Button';
+import { useCurrency } from '../context/CurrencyContext';
 
 const PAYMENT_METHOD_LABELS = {
   cod: 'الدفع عند الاستلام',
@@ -13,6 +14,7 @@ const PAYMENT_METHOD_LABELS = {
 };
 
 const OrderSuccess = () => {
+  const { currencySymbol } = useCurrency();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { state } = location || {};
@@ -132,7 +134,7 @@ const OrderSuccess = () => {
             </div>
             <div className="flex justify-between border-t border-stone-50 pt-3 text-base font-bold text-stone-850">
               <span>القيمة الإجمالية:</span>
-              <span className="text-primary-dark font-black">{order.totalPrice.toLocaleString('ar-EG')} ج.م</span>
+              <span className="text-primary-dark font-black">{order.totalPrice.toLocaleString('ar-EG')} {currencySymbol}</span>
             </div>
           </div>
 
