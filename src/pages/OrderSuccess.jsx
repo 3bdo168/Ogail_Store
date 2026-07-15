@@ -13,6 +13,8 @@ const PAYMENT_METHOD_LABELS = {
   cash: 'كاش عند الاستلام',
 };
 
+const TRACKING_PHONE_STORAGE_KEY = 'ogail_last_order_phone';
+
 const OrderSuccess = () => {
   const { currencySymbol } = useCurrency();
   const location = useLocation();
@@ -35,7 +37,12 @@ const OrderSuccess = () => {
         const docRef = doc(db, 'orders', orderId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setOrder({ id: docSnap.id, ...docSnap.data() });
+          const data = docSnap.data();
+          setOrder({ id: docSnap.id, ...data });
+          // Store phone for tracking link
+          if (data.customerPhone) {
+            sessionStorage.setItem(TRACKING_PHONE_STORAGE_KEY, data.customerPhone);
+          }
         }
       } catch (err) {
         console.error('Error fetching order receipt:', err);
@@ -66,6 +73,34 @@ const OrderSuccess = () => {
       <p className="text-stone-500 text-sm mb-8 max-w-md mx-auto">
         شكراً لتسوقك من {BRAND.nameArabic}. تم استلام تفاصيل شحنتك وجاري مراجعتها وتعبئتها لإرسالها بأقرب وقت ممكن.
       </p>
+
+      {/* Tracking Callout */}
+      {order && (
+        <div className="bg-indigo-50 border border-indigo-100 rounded-3xl p-5 mb-8 text-right">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+            <div className="flex-grow">
+              <h3 className="font-extrabold text-indigo-800 text-sm mb-1">تتبع حالة طلبك</h3>
+              <p className="text-indigo-600 text-xs leading-relaxed">
+                يمكنك متابعة حالة طلبك في أي وقت من خلال رابط التتبع. احتفظ برقم الطلب ورقم هاتفك للرجوع إليهما لاحقاً.
+              </p>
+            </div>
+            <Link
+              to={`/track-order?orderId=${order.id}&phone=${encodeURIComponent(sessionStorage.getItem(TRACKING_PHONE_STORAGE_KEY) || '')}`}
+              className="flex-shrink-0 inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black text-xs shadow-md transition-colors"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+              تتبع حالة طلبك
+            </Link>
+          </div>
+        </div>
+      )}
 
       {order ? (
         <div className="bg-white rounded-3xl border border-stone-100 shadow-sm p-6 text-right mb-8">
@@ -104,7 +139,7 @@ const OrderSuccess = () => {
           </div>
 
           <div className="bg-stone-50 p-4 rounded-2xl text-xs text-stone-500 leading-relaxed text-center">
-            قريباً ستتلقى اتصالاً هاتفياً من فريق التوصيل لتنسيق موعد تسليم الشحنة. إذا كان لديك أي استفسار يرجى الاحتفاظ برقم الطلب.
+            قريباً ستتلقى اتصالاً هاتفياً من فريق التوصيل لتنسيق موعد تسليم الشحنة. احتفظ برقم الطلب ورقم هاتفك للرجوع لتتبع الطلب في أي وقت.
           </div>
 
         </div>
