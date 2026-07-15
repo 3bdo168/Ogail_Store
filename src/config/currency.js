@@ -1,9 +1,21 @@
-// قائمة العملات المدعومة
+// قائمة العملات المدعومة — جميع عملات الدول العربية
 export const CURRENCIES = {
-  EGP: { code: 'EGP', symbol: 'ج.م', name: 'جنيه مصري' },
-  USD: { code: 'USD', symbol: '$', name: 'دولار أمريكي' },
-  SAR: { code: 'SAR', symbol: 'ر.س', name: 'ريال سعودي' },
-  AED: { code: 'AED', symbol: 'د.إ', name: 'درهم إماراتي' },
-  QAR: { code: 'QAR', symbol: 'ر.ق', name: 'ريال قطري' },
-  KWD: { code: 'KWD', symbol: 'د.ك', name: 'دينار كويتي' },
+  EGP: { code: 'EGP', symbol: 'ج.م', name: 'الجنيه المصري' },
+  SAR: { code: 'SAR', symbol: 'ر.س', name: 'الريال السعودي' },
+  AED: { code: 'AED', symbol: 'د.إ', name: 'الدرهم الإماراتي' },
+  KWD: { code: 'KWD', symbol: 'د.ك', name: 'الدينار الكويتي' },
+  BHD: { code: 'BHD', symbol: 'د.ب', name: 'الدينار البحريني' },
+  OMR: { code: 'OMR', symbol: 'ر.ع', name: 'الريال العماني' },
+  QAR: { code: 'QAR', symbol: 'ر.ق', name: 'الريال القطري' },
+  JOD: { code: 'JOD', symbol: 'د.أ', name: 'الدينار الأردني' },
+  IQD: { code: 'IQD', symbol: 'د.ع', name: 'الدينار العراقي' },
+  LYD: { code: 'LYD', symbol: 'د.ل', name: 'الدينار الليبي' },
+  DZD: { code: 'DZD', symbol: 'د.ج', name: 'الدينار الجزائري' },
+  TND: { code: 'TND', symbol: 'د.ت', name: 'الدينار التونسي' },
+  MAD: { code: 'MAD', symbol: 'د.م', name: 'الدرهم المغربي' },
+  LBP: { code: 'LBP', symbol: 'ل.ل', name: 'الليرة اللبنانية' },
+  SYP: { code: 'SYP', symbol: 'ل.س', name: 'الليرة السورية' },
+  YER: { code: 'YER', symbol: 'ر.ي', name: 'الريال اليمني' },
+  SDG: { code: 'SDG', symbol: 'ج.س', name: 'الجنيه السوداني' },
+  USD: { code: 'USD', symbol: '$',   name: 'الدولار الأمريكي' },
 };
