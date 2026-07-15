@@ -60,7 +60,7 @@ const Dashboard = () => {
 
   // Total Revenue: sum of all orders that are paid, or all orders in general (excluding pending online payments if appropriate)
   const totalRevenue = orders
-    .filter((o) => o.paymentStatus === 'paid' || o.paymentMethod === 'cash')
+    .filter((o) => o.paymentStatus === 'paid' || o.paymentMethod === 'cash' || o.paymentMethod === 'cod')
     .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
 
   const recentOrders = orders.slice(0, 5);

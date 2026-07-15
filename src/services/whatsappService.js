@@ -1,13 +1,43 @@
 import { BRAND } from '../config/brand';
 
-// تنظيف رقم التليفون المصري — يتعامل مع كل الصيغ
+// تنظيف رقم التليفون وتحويله لصيغة مناسبة للواتساب (تدعم الأرقام المصرية والدولية)
 export const sanitizeEgyptianPhone = (phone) => {
-  let cleaned = phone.replace(/\D/g, '');
-  if (cleaned.startsWith('00')) cleaned = cleaned.substring(2);
-  if (cleaned.startsWith('20')) return cleaned;
-  if (cleaned.startsWith('0')) return '2' + cleaned;
-  if (cleaned.startsWith('1')) return '20' + cleaned;
-  return '20' + cleaned;
+  const target = phone.trim();
+  const startsWithPlus = target.startsWith('+');
+  let cleaned = target.replace(/\D/g, '');
+  
+  // إذا كان الرقم يبدأ بـ +، نعتبره صيغة دولية جاهزة
+  if (startsWithPlus) {
+    return cleaned;
+  }
+  
+  // إذا كان يبدأ بـ 00، نزيل الصفرين في البداية لتصبح صيغة دولية
+  if (cleaned.startsWith('00')) {
+    return cleaned.substring(2);
+  }
+  
+  // معالجة الأرقام المصرية المحلية تلقائياً لتسهيل تجربة العميل المصري
+  // رقم مصري محلي يبدأ بـ 01 وطوله 11 رقماً (مثال: 01012345678 -> 201012345678)
+  if (cleaned.startsWith('01') && cleaned.length === 11) {
+    return '2' + cleaned;
+  }
+  
+  // رقم مصري محلي بدون الصفر الأول وطوله 10 أرقام (مثال: 1012345678 -> 201012345678)
+  if (cleaned.startsWith('1') && cleaned.length === 10) {
+    return '20' + cleaned;
+  }
+  
+  // إذا كان الرقم طويلاً (11 رقم أو أكثر) ولا يبدأ بصفر، نفترض أنه يشتمل بالفعل على مفتاح الدولة
+  if (cleaned.length >= 11 && !cleaned.startsWith('0')) {
+    return cleaned;
+  }
+  
+  // حالة احتياطية للأرقام المصرية التي تبدأ بـ 0 وطولها 11
+  if (cleaned.startsWith('0') && cleaned.length === 11) {
+    return '2' + cleaned;
+  }
+  
+  return cleaned;
 };
 
 // فتح واتساب مع fallback لو الـ popup اتبلوك

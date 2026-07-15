@@ -105,7 +105,7 @@ const OrderTracking = () => {
         <div className="relative flex-1">
           <input
             type="text"
-            placeholder="أدخل رقم الهاتف (مثال: 010XXXXXXXX) أو رقم الطلب..."
+            placeholder="أدخل رقم الهاتف أو رقم الطلب..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-4 pr-12 py-3.5 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary text-stone-700 font-medium text-sm transition-all"

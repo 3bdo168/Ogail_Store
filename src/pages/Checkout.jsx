@@ -4,7 +4,6 @@ import { useCart } from '../context/CartContext';
 import { useOrders } from '../hooks/useOrders';
 import Button from '../components/ui/Button';
 import { subscribeToShippingRates } from '../services/shippingService';
-import { notifyCustomer, notifyAdminNewOrder } from '../services/whatsappService';
 import { useCurrency } from '../context/CurrencyContext';
 
 const Checkout = () => {
@@ -19,7 +18,7 @@ const Checkout = () => {
     phone: '',
     address: '',
   });
-  const [paymentMethod, setPaymentMethod] = useState('cash'); // cash | online
+  const [paymentMethod] = useState('cod'); // Default and only option: cash on delivery (cod)
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -64,10 +63,10 @@ const Checkout = () => {
     if (!selectedGov) return 'يرجى اختيار المحافظة لتحديد سعر الشحن.';
     if (!formData.phone.trim()) return 'يرجى إدخال رقم الهاتف.';
 
-    // Egyptian phone number regex validation (starts with 010, 011, 012, 015)
-    const phoneRegex = /^01[0125][0-9]{8}$/;
+    // General phone number regex validation (8-15 digits, optional leading +)
+    const phoneRegex = /^\+?[0-9]{8,15}$/;
     if (!phoneRegex.test(formData.phone.trim())) {
-      return 'يرجى إدخال رقم هاتف مصري صحيح مكون من 11 رقم (مثال: 010XXXXXXXX).';
+      return 'من فضلك أدخل رقم هاتف صحيح.';
     }
 
     if (!formData.address.trim()) return 'يرجى إدخال عنوان الشحن بالتفصيل.';
@@ -103,28 +102,12 @@ const Checkout = () => {
 
       // 1. Submit order to Firestore
       const orderId = await submitOrder(orderData);
-      const savedOrder = { id: orderId, ...orderData };
-
-      // 1. إشعار العميل بتأكيد الطلب
-      const customerResult = notifyCustomer(savedOrder, 'confirmed', currencySymbol);
-
-      // 2. إشعار الأدمن
-      notifyAdminNewOrder(savedOrder, currencySymbol);
 
       clearCart();
 
-      if (paymentMethod === 'cash') {
+      if (paymentMethod === 'cod' || paymentMethod === 'cash') {
         // Cash order flow completes instantly
-        if (!customerResult.success) {
-          navigate('/order-success', {
-            state: {
-              orderId: orderId,
-              whatsappFallbackUrl: customerResult.url
-            }
-          });
-        } else {
-          navigate('/order-success', { state: { orderId: orderId } });
-        }
+        navigate('/order-success', { state: { orderId: orderId } });
       } else {
         // Online payment flow via Paymob
         const payData = {
@@ -137,16 +120,7 @@ const Checkout = () => {
 
         if (paymentResponse.simulated) {
           // If Paymob CORS/unconfigured, go to success page with notice
-          if (!customerResult.success) {
-            navigate(paymentResponse.redirectUrl, {
-              state: {
-                orderId: orderId,
-                whatsappFallbackUrl: customerResult.url
-              }
-            });
-          } else {
-            navigate(paymentResponse.redirectUrl, { state: { orderId: orderId } });
-          }
+          navigate(paymentResponse.redirectUrl, { state: { orderId: orderId } });
         } else {
           // Redirect to actual Paymob checkout frame
           window.location.href = paymentResponse.redirectUrl;
@@ -217,13 +191,13 @@ const Checkout = () => {
 
               <div>
                 <label className="block text-stone-600 font-bold text-sm mb-2" htmlFor="phone">
-                  رقم الهاتف (محمول مصري) *
+                  رقم الهاتف *
                 </label>
                 <input
                   type="tel"
                   id="phone"
                   name="phone"
-                  placeholder="مثال: 01012345678"
+                  placeholder="مثال: +201012345678"
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
@@ -275,72 +249,13 @@ const Checkout = () => {
 
             </div>
 
-            {/* Payment Method */}
-            <h3 className="text-xl font-extrabold text-stone-800 pb-4 mb-6 border-b border-stone-50">
-              طريقة الدفع
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-
-              {/* Option 1: Cash */}
-              <div
-                onClick={() => setPaymentMethod('cash')}
-                className={`p-5 rounded-2xl border-2 cursor-pointer transition-all-300 flex items-center justify-between ${paymentMethod === 'cash'
-                  ? 'border-primary bg-primary/5 shadow-sm'
-                  : 'border-stone-200 bg-white hover:border-stone-300'
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-800 text-sm">كاش عند الاستلام</h4>
-                    <p className="text-stone-400 text-xs mt-0.5">ادفع عند توصيل المنتج لبابك</p>
-                  </div>
-                </div>
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-primary' : 'border-stone-300'
-                  }`}>
-                  {paymentMethod === 'cash' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
-                </div>
-              </div>
-
-              {/* Option 2: Online */}
-              <div
-                onClick={() => setPaymentMethod('online')}
-                className={`p-5 rounded-2xl border-2 cursor-pointer transition-all-300 flex items-center justify-between ${paymentMethod === 'online'
-                  ? 'border-primary bg-primary/5 shadow-sm'
-                  : 'border-stone-200 bg-white hover:border-stone-300'
-                  }`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-stone-800 text-sm">دفع إلكتروني (بطاقة / محفظة)</h4>
-                    <p className="text-stone-400 text-xs mt-0.5">ادفع الآن بأمان عبر شبكة Paymob</p>
-                  </div>
-                </div>
-                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'online' ? 'border-primary' : 'border-stone-300'
-                  }`}>
-                  {paymentMethod === 'online' && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
-                </div>
-              </div>
-
-            </div>
-
             <Button
               type="submit"
               variant="primary"
               loading={submitting}
               className="w-full py-4 rounded-2xl font-black text-base shadow-lg"
             >
-              {paymentMethod === 'cash' ? 'تأكيد طلب التوصيل كاش' : 'الانتقال لبوابة الدفع الآمن'}
+              تأكيد الطلب والشحن
             </Button>
 
           </form>

@@ -9,7 +9,7 @@ export const CurrencyProvider = ({ children }) => {
   const [currencyCode, setCurrencyCode] = useState('EGP');
 
   useEffect(() => {
-    const docRef = doc(db, 'settings', 'store');
+    const docRef = doc(db, 'settings', 'storeConfig');
     const unsubscribe = onSnapshot(docRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
