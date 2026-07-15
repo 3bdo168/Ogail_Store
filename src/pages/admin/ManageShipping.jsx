@@ -2,11 +2,14 @@ import React, { useState, useEffect } from 'react';
 import {
   subscribeToShippingRates,
   updateShippingRate,
-  initializeShippingRates
+  initializeShippingRates,
+  addShippingRate,
+  deleteShippingRate
 } from '../../services/shippingService';
 import Loader from '../../components/ui/Loader';
 import Button from '../../components/ui/Button';
-import { Save, RefreshCw } from 'lucide-react';
+import { Save, RefreshCw, Plus, Trash2 } from 'lucide-react';
+
 
 const ManageShipping = () => {
   const [shippingRates, setShippingRates] = useState([]);
@@ -16,6 +19,78 @@ const ManageShipping = () => {
   const [success, setSuccess] = useState('');
   const [filter, setFilter] = useState('all'); // all | active | inactive
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Add Governorate Modal state
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newGov, setNewGov] = useState({
+    name: '',
+    price: 0,
+    estimatedDays: '2-3 أيام',
+    isActive: true
+  });
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalError, setModalError] = useState('');
+
+  // Delete Governorate handler
+  const handleDelete = async (id, name) => {
+    if (window.confirm(`متأكد إنك عايز تحذف ${name}؟ الإجراء ده مش قابل للتراجع`)) {
+      setActionLoading(true);
+      setError('');
+      setSuccess('');
+      try {
+        await deleteShippingRate(id);
+        // Clear from local edits map if any
+        if (localRates[id]) {
+          setLocalRates((prev) => {
+            const copy = { ...prev };
+            delete copy[id];
+            return copy;
+          });
+        }
+        setSuccess(`تم حذف محافظة ${name} بنجاح!`);
+        setTimeout(() => setSuccess(''), 3000);
+      } catch (err) {
+        console.error(err);
+        setError('حدث خطأ أثناء حذف المحافظة.');
+      } finally {
+        setActionLoading(false);
+      }
+    }
+  };
+
+  // Add Governorate submit handler
+  const handleAddSubmit = async (e) => {
+    e.preventDefault();
+    if (!newGov.name.trim()) {
+      setModalError('اسم المحافظة مطلوب');
+      return;
+    }
+    setModalLoading(true);
+    setModalError('');
+    try {
+      await addShippingRate({
+        name: newGov.name.trim(),
+        price: Number(newGov.price),
+        estimatedDays: newGov.estimatedDays.trim(),
+        isActive: newGov.isActive
+      });
+      setSuccess('تم إضافة المحافظة الجديدة بنجاح!');
+      setTimeout(() => setSuccess(''), 3000);
+      setIsAddModalOpen(false);
+      setNewGov({
+        name: '',
+        price: 0,
+        estimatedDays: '2-3 أيام',
+        isActive: true
+      });
+    } catch (err) {
+      console.error(err);
+      setModalError('حدث خطأ أثناء إضافة المحافظة.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
 
   // Subscribe to shipping rates in real-time
   useEffect(() => {
@@ -184,6 +259,14 @@ const ManageShipping = () => {
         </div>
         <div className="flex flex-wrap gap-2.5">
           <Button
+            variant="primary"
+            onClick={() => setIsAddModalOpen(true)}
+            className="rounded-2xl font-bold py-2.5 px-4 text-xs sm:text-sm flex items-center gap-1.5"
+          >
+            <Plus size={16} className="ml-1.5" />
+            إضافة محافظة جديدة
+          </Button>
+          <Button
             variant="outline"
             onClick={handleInitialize}
             loading={actionLoading}
@@ -204,6 +287,7 @@ const ManageShipping = () => {
             </Button>
           )}
         </div>
+
       </div>
 
       {/* Notifications */}
@@ -341,25 +425,124 @@ const ManageShipping = () => {
 
                       {/* Row Action */}
                       <td className="py-4 px-4 text-center">
-                        <button
-                          disabled={!isDirty}
-                          onClick={() => handleSaveRow(rate.id)}
-                          className={`p-2 rounded-xl transition-all font-bold text-xs inline-flex items-center gap-1 border ${
-                            isDirty
-                              ? 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 cursor-pointer'
-                              : 'border-stone-100 text-stone-300 cursor-not-allowed'
-                          }`}
-                          title="حفظ تعديل المحافظة"
-                        >
-                          <Save size={14} />
-                          حفظ
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            disabled={!isDirty}
+                            onClick={() => handleSaveRow(rate.id)}
+                            className={`p-2 rounded-xl transition-all font-bold text-xs inline-flex items-center gap-1 border ${
+                              isDirty
+                                ? 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20 cursor-pointer'
+                                : 'border-stone-100 text-stone-300 cursor-not-allowed'
+                            }`}
+                            title="حفظ تعديل المحافظة"
+                          >
+                            <Save size={14} />
+                            حفظ
+                          </button>
+                          <button
+                            onClick={() => handleDelete(rate.id, rate.name)}
+                            className="p-2 rounded-xl transition-all font-bold text-xs inline-flex items-center gap-1 border border-rose-100 text-rose-600 hover:bg-rose-50 cursor-pointer"
+                            title="حذف المحافظة"
+                          >
+                            <Trash2 size={14} />
+                            حذف
+                          </button>
+                        </div>
                       </td>
+
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+          </div>
+         </div>
+      )}
+      {/* Modal لعملية إضافة محافظة جديدة */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white w-full max-w-md rounded-3xl border border-stone-100 shadow-2xl overflow-hidden p-6 text-right relative">
+            <h3 className="text-xl font-black text-stone-850 mb-1">إضافة محافظة جديدة</h3>
+            <p className="text-stone-400 text-xs mb-6">أدخل تفاصيل المحافظة الجديدة لتفعيل خيارات الشحن لها.</p>
+
+            {modalError && (
+              <div className="bg-rose-50 border border-rose-100 text-rose-750 p-3 rounded-2xl text-xs font-bold mb-4">
+                {modalError}
+              </div>
+            )}
+
+            <form onSubmit={handleAddSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-stone-600 font-bold text-xs mb-2">اسم المحافظة *</label>
+                <input
+                  type="text"
+                  required
+                  value={newGov.name}
+                  onChange={(e) => setNewGov(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="مثال: أسوان"
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-stone-750 font-bold text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-stone-600 font-bold text-xs mb-2">سعر الشحن (ج.م) *</label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={newGov.price}
+                  onChange={(e) => setNewGov(prev => ({ ...prev, price: e.target.value }))}
+                  placeholder="0"
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-stone-750 font-bold text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-stone-600 font-bold text-xs mb-2">مدة التوصيل المتوقعة *</label>
+                <input
+                  type="text"
+                  required
+                  value={newGov.estimatedDays}
+                  onChange={(e) => setNewGov(prev => ({ ...prev, estimatedDays: e.target.value }))}
+                  placeholder="مثال: 2-3 أيام"
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-stone-750 font-bold text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-stone-600 font-bold text-xs mb-2">الحالة *</label>
+                <select
+                  value={newGov.isActive ? 'true' : 'false'}
+                  onChange={(e) => setNewGov(prev => ({ ...prev, isActive: e.target.value === 'true' }))}
+                  className="w-full px-4 py-3 bg-stone-50 border border-stone-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-stone-750 font-bold text-sm cursor-pointer"
+                >
+                  <option value="true">نشطة</option>
+                  <option value="false">متوقفة</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4 border-t border-stone-100 mt-2">
+                <Button
+                  type="submit"
+                  variant="primary"
+                  loading={modalLoading}
+                  className="py-2.5 px-6 rounded-2xl font-black text-xs"
+                >
+                  حفظ المحافظة
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAddModalOpen(false);
+                    setNewGov({ name: '', price: 0, estimatedDays: '2-3 أيام', isActive: true });
+                    setModalError('');
+                  }}
+                  className="py-2.5 px-4 rounded-2xl border border-stone-200 hover:bg-stone-50 text-stone-500 hover:text-stone-700 font-bold text-xs transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -367,5 +550,6 @@ const ManageShipping = () => {
     </div>
   );
 };
+
 
 export default ManageShipping;

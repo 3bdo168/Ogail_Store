@@ -1,8 +1,9 @@
 import { db } from '../firebase';
 import {
   collection, doc, getDocs, setDoc,
-  updateDoc, onSnapshot
+  updateDoc, onSnapshot, deleteDoc
 } from 'firebase/firestore';
+
 
 // المحافظات الافتراضية وقيم الشحن المبدئية.
 // تنبيه: هذه القيم تعتبر أمثلة افتراضية قابلة للتعديل بالكامل من قبل صاحب المتجر
@@ -63,3 +64,17 @@ export const getShippingRate = async (governorateId) => {
   const rate = rates.docs.find(d => d.id === governorateId);
   return rate ? { id: rate.id, ...rate.data() } : null;
 };
+
+// إضافة محافظة جديدة
+export const addShippingRate = async (data) => {
+  const docRef = doc(collection(db, 'shippingRates'));
+  const id = docRef.id;
+  await setDoc(docRef, { ...data, id });
+  return id;
+};
+
+// حذف محافظة
+export const deleteShippingRate = async (id) => {
+  return await deleteDoc(doc(db, 'shippingRates', id));
+};
+
