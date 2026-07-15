@@ -21,12 +21,8 @@ export const useOrders = (autoFetch = false) => {
   }, []);
 
   const submitOrder = async (orderData) => {
-    try {
-      return await orderService.createOrder(orderData);
-    } catch (err) {
-      console.error(err);
-      throw new Error('فشل تسجيل الطلب.');
-    }
+    // Pass through the original error message (stock shortage, permissions, etc.)
+    return await orderService.createOrder(orderData);
   };
 
   const updateStatus = async (orderId, orderStatus) => {

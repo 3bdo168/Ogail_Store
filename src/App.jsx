@@ -24,6 +24,7 @@ import Dashboard from './pages/admin/Dashboard';
 import ManageProducts from './pages/admin/ManageProducts';
 import ManageOrders from './pages/admin/ManageOrders';
 import ManageShipping from './pages/admin/ManageShipping';
+import SalesArchive from './pages/admin/SalesArchive';
 import AdminLayout from './components/layout/AdminLayout';
 
 function App() {
@@ -55,6 +56,7 @@ function App() {
                   <Route path="/admin/dashboard" element={<Dashboard />} />
                   <Route path="/admin/products" element={<ManageProducts />} />
                   <Route path="/admin/orders" element={<ManageOrders />} />
+                  <Route path="/admin/sales-archive" element={<SalesArchive />} />
                   <Route path="/admin/shipping" element={<ManageShipping />} />
                 </Route>
               </Route>

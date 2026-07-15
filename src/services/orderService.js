@@ -78,7 +78,9 @@ export const createOrder = async (orderData) => {
           updatePayload.isAvailable = false;
         }
 
+        console.log(`[createOrder] Updating stock for "${item.name}": ${currentStock} → ${newStock} (ordered ${item.quantity})`);
         transaction.update(doc(db, PRODUCTS_COLLECTION, item.id), updatePayload);
+        console.log(`[createOrder] Stock update for "${item.name}" committed in transaction`);
       }
 
       return orderRef.id;
